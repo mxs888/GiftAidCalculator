@@ -1,1 +1,5 @@
+/GiftAidCalculator/GiftAidCalculatorCore/bin/*
+/GiftAidCalculator/GiftAidCalculatorCore/obj/*
+/GiftAidCalculator/GiftAidCalculatorTests/bin/*
+/GiftAidCalculator/GiftAidCalculatorTests/obj/*
 /GiftAidCalculator/.vs/*
