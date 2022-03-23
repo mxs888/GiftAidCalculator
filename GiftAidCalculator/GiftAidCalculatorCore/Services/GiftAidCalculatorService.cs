@@ -10,13 +10,16 @@ namespace GiftAidCalculatorCore.Services
     {
         private readonly ITaxRateRepository _taxRateRepository;
         private readonly IRoundingHelper _roundingHelper;
+        private readonly IEventSupplementor _eventSupplementor;
 
         public GiftAidCalculatorService(
             ITaxRateRepository taxRateRepository,
-            IRoundingHelper roundingHelper)
+            IRoundingHelper roundingHelper,
+            IEventSupplementor eventSupplementor)
         {
             _taxRateRepository = taxRateRepository;
             _roundingHelper = roundingHelper;
+            _eventSupplementor = eventSupplementor;
         }
 
         public async Task<decimal> Calculate(decimal donation)
@@ -28,6 +31,12 @@ namespace GiftAidCalculatorCore.Services
             }
 
             return _roundingHelper.Round2(donation * (taxRate / (100m - taxRate)));
+        }
+
+        public async Task<decimal> Calculate(decimal donation, EventTypeEnum eventTypeEnum)
+        {
+            decimal amount = await Calculate(donation);
+            return await _eventSupplementor.Apply(amount, eventTypeEnum);
         }
     }
 }

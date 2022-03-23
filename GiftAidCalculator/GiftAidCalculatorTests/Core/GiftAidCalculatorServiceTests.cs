@@ -1,5 +1,7 @@
-﻿using GiftAidCalculatorCore.Interfaces.Database;
+﻿using GiftAidCalculatorCore;
+using GiftAidCalculatorCore.Interfaces.Database;
 using GiftAidCalculatorCore.Interfaces.Helpers;
+using GiftAidCalculatorCore.Interfaces.Services;
 using GiftAidCalculatorCore.Services;
 using Moq;
 using System;
@@ -12,6 +14,7 @@ namespace GiftAidCalculatorTests.Core
     {
         private readonly Mock<ITaxRateRepository> _taxRateRepositoryMock;
         private readonly Mock<IRoundingHelper> _roundingHelperMock;
+        private readonly Mock<IEventSupplementor> _eventSupplementMock;
 
         private readonly GiftAidCalculatorService _giftAidCalculatorService;
 
@@ -19,6 +22,7 @@ namespace GiftAidCalculatorTests.Core
         {
             _taxRateRepositoryMock = new Mock<ITaxRateRepository>();
             _roundingHelperMock = new Mock<IRoundingHelper>();
+            _eventSupplementMock = new Mock<IEventSupplementor>();
 
             _taxRateRepositoryMock.Setup(m => m.GetCurrentTaxRate())
                 .ReturnsAsync(20m);
@@ -28,7 +32,8 @@ namespace GiftAidCalculatorTests.Core
 
             _giftAidCalculatorService = new GiftAidCalculatorService(
                 _taxRateRepositoryMock.Object,
-                _roundingHelperMock.Object);
+                _roundingHelperMock.Object,
+                _eventSupplementMock.Object);
         }
 
         [Theory]
@@ -67,6 +72,20 @@ namespace GiftAidCalculatorTests.Core
             // Assert
             Assert.Equal(expected, actual);
             _roundingHelperMock.Verify(m => m.Round2(expected), Times.Once);
+        }
+
+        [Fact]
+        public async Task Calculate_ShouldReturnCorrectValueWithEventType()
+        {
+            // Arrange
+            _eventSupplementMock.Setup(m => m.Apply(It.IsAny<decimal>(), EventTypeEnum.Running))
+                .ReturnsAsync(200m);
+
+            // Act
+            decimal actual = await _giftAidCalculatorService.Calculate(100m, EventTypeEnum.Running);
+
+            // Assert
+            Assert.Equal(200m, actual);
         }
 
         [Fact]
