@@ -1,4 +1,5 @@
 ﻿using GiftAidCalculatorCore.Interfaces.Database;
+using GiftAidCalculatorCore.Interfaces.Helpers;
 using GiftAidCalculatorCore.Services;
 using Moq;
 using System;
@@ -10,17 +11,24 @@ namespace GiftAidCalculatorTests.Core
     public class GiftAidCalculatorServiceTests
     {
         private readonly Mock<ITaxRateRepository> _taxRateRepositoryMock;
+        private readonly Mock<IRoundingHelper> _roundingHelperMock;
 
         private readonly GiftAidCalculatorService _giftAidCalculatorService;
 
         public GiftAidCalculatorServiceTests()
         {
             _taxRateRepositoryMock = new Mock<ITaxRateRepository>();
+            _roundingHelperMock = new Mock<IRoundingHelper>();
+
             _taxRateRepositoryMock.Setup(m => m.GetCurrentTaxRate())
                 .ReturnsAsync(20m);
 
+            _roundingHelperMock.Setup(m => m.Round2(It.IsAny<decimal>()))
+                .Returns<decimal>(value => value);
+
             _giftAidCalculatorService = new GiftAidCalculatorService(
-                _taxRateRepositoryMock.Object);
+                _taxRateRepositoryMock.Object,
+                _roundingHelperMock.Object);
         }
 
         [Theory]
@@ -37,6 +45,7 @@ namespace GiftAidCalculatorTests.Core
 
             // Assert
             Assert.Equal(expected, actual);
+            _roundingHelperMock.Verify(m => m.Round2(expected), Times.Once);
         }
 
         [Theory]
@@ -57,6 +66,7 @@ namespace GiftAidCalculatorTests.Core
 
             // Assert
             Assert.Equal(expected, actual);
+            _roundingHelperMock.Verify(m => m.Round2(expected), Times.Once);
         }
 
         [Fact]
@@ -71,6 +81,7 @@ namespace GiftAidCalculatorTests.Core
 
             // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await awaitable);
+            _roundingHelperMock.Verify(m => m.Round2(It.IsAny<decimal>()), Times.Never);
         }
     }
 }
