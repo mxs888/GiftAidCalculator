@@ -3,3 +3,5 @@
 /GiftAidCalculator/GiftAidCalculatorTests/bin/*
 /GiftAidCalculator/GiftAidCalculatorTests/obj/*
 /GiftAidCalculator/.vs/*
+/GiftAidCalculator/GiftAidCalculatorInfrastructure/bin/*
+/GiftAidCalculator/GiftAidCalculatorInfrastructure/obj/*

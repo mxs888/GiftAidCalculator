@@ -1,19 +1,28 @@
-﻿using GiftAidCalculatorCore.Interfaces.Services;
+﻿using GiftAidCalculatorCore.Interfaces.Database;
+using GiftAidCalculatorCore.Interfaces.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace GiftAidCalculatorCore.Services
 {
     public class GiftAidCalculatorService : IGiftAidCalculatorService
     {
-        private readonly decimal _taxRage = 20m;
+        private readonly ITaxRateRepository _taxRateRepository;
 
-        public GiftAidCalculatorService()
+        public GiftAidCalculatorService(ITaxRateRepository taxRateRepository)
         {
+            _taxRateRepository = taxRateRepository;
         }
 
-        public Task<decimal> Calculate(decimal donation)
+        public async Task<decimal> Calculate(decimal donation)
         {
-            return Task.FromResult(donation * (_taxRage / (100m - _taxRage)));
+            decimal taxRate = await _taxRateRepository.GetCurrentTaxRate();
+            if (taxRate >= 100m)
+            {
+                throw new InvalidOperationException($"Invalid tax rate value {taxRate}");
+            }
+
+            return donation * (taxRate / (100m - taxRate));
         }
     }
 }
